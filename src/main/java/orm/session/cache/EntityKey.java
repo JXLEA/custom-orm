@@ -1,6 +1,6 @@
 package orm.session.cache;
 
-import static orm.util.EntityUtil.getEntityId;
+import static orm.util.EntityUtil.getId;
 
 public record EntityKey<T>(Class<T> type, Object id) {
     public static <T> EntityKey<T> of(Class<T> type, Object id) {
@@ -8,7 +8,7 @@ public record EntityKey<T>(Class<T> type, Object id) {
     }
 
     public static <T> EntityKey<T> of(T entity) {
-        var entityId = getEntityId(entity);
+        var entityId = getId(entity);
         var entityType = entity.getClass();
         return new EntityKey(entityType, entityId);
     }

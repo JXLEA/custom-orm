@@ -1,7 +1,9 @@
 package orm.demo.entity;
 
 import lombok.Data;
+import orm.annotation.Column;
 import orm.annotation.Id;
+import orm.annotation.ManyToOne;
 import orm.annotation.Table;
 
 @Data
@@ -11,7 +13,9 @@ public class Note {
     @Id
     private int id;
 
-    private int author;
+    @ManyToOne
+    @Column(value = "author")
+    private Person person;
 
     private String note;
 }

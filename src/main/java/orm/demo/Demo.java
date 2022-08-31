@@ -11,21 +11,17 @@ import javax.sql.DataSource;
 public class Demo {
 
     public static void main(String[] args) {
-
         SessionFactory sessionFactory = new SessionFactoryImpl(initializeDataSource());
         var session = sessionFactory.openSession();
 
-        var person = session.findById(Person.class, 1);
-        var person1 = session.findById(Person.class, 1);
+        var person = session.findById(Person.class, 4);
+        System.out.println(person);
 
-        System.out.println(person == person1);
 
-        var note = session.findById(Note.class, 1);
+        person.getNotes().forEach(System.out::println);
+
+        person.setFirstName("John");
         session.close();
-        System.out.println(note);
-
-        var notes = session.findAllBy(Note.class, "author", 4);
-        System.out.println(notes);
     }
 
     private static DataSource initializeDataSource() {

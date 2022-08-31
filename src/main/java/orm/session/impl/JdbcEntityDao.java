@@ -2,16 +2,27 @@ package orm.session.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import orm.collection.LazyList;
 import orm.session.cache.EntityKey;
 import orm.util.EntityUtil;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import static orm.util.EntityUtil.*;
+import static orm.util.EntityUtil.getEntityCollectionElementType;
+import static orm.util.EntityUtil.getFieldByName;
+import static orm.util.EntityUtil.getId;
+import static orm.util.EntityUtil.getIdField;
+import static orm.util.EntityUtil.getRelatedEntityField;
+import static orm.util.EntityUtil.resolveColumnName;
+import static orm.util.EntityUtil.resolveTableName;
 
 @RequiredArgsConstructor
 public class JdbcEntityDao {
@@ -21,7 +32,8 @@ public class JdbcEntityDao {
 
     private boolean open = true;
 
-    private Map<EntityKey<?>, Object> entityCache = new ConcurrentHashMap<>();
+    private Map<EntityKey<?>, Object> entityCache = new HashMap<>();
+    private Map<EntityKey<?>, Object[]> entitySnapshots = new HashMap<>();
 
     @SneakyThrows
     private <T> T findOneBy(Class<T> type, Field field, Object value) {
@@ -31,6 +43,7 @@ public class JdbcEntityDao {
             var selectSql = String.format(SELECT_FROM_TABLE_BY_COLUMN, tableName, columnName);
             try (var statement = connection.prepareStatement(selectSql)) {
                 statement.setObject(1, value);
+                System.out.println(statement);
                 var resultSet = statement.executeQuery();
                 resultSet.next();
                 return createEntityFromResultSet(type, resultSet);
@@ -42,10 +55,25 @@ public class JdbcEntityDao {
     private <T> T createEntityFromResultSet(Class<T> type, ResultSet resultSet) {
         var entity = type.getDeclaredConstructor().newInstance();
         for (var field : type.getDeclaredFields()) {
-            String columnName = EntityUtil.resolveColumnName(field);
-            var columnValue = resultSet.getObject(columnName);
             field.setAccessible(Boolean.TRUE);
-            field.set(entity, columnValue);
+            if (EntityUtil.isRegularField(field)) {
+                var columnName = resolveColumnName(field);
+                var columnValue = resultSet.getObject(columnName);
+                field.set(entity, columnValue);
+            } else if (EntityUtil.isEntityField(field)) {
+                var relatedEntityType = field.getType();
+                var joinColumnName = resolveColumnName(field);
+                var joinColumnValue = resultSet.getObject(joinColumnName);
+                var relatedEntityIdField = getIdField(type);
+                var relatedEntity = findOneBy(relatedEntityType, relatedEntityIdField, joinColumnValue);
+                field.set(entity, relatedEntity);
+            } else if (EntityUtil.isEntityCollectionField(field)) {
+                var relatedEntityType = getEntityCollectionElementType(field);
+                var relatedEntityField = getRelatedEntityField(type, relatedEntityType);
+                var entityId = getId(entity);
+                var entityCollection = new LazyList<T>(() -> findAllBy(relatedEntityType, relatedEntityField, entityId));
+                field.set(entity, entityCollection);
+            }
         }
         return cache(entity);
     }
@@ -101,7 +129,32 @@ public class JdbcEntityDao {
     }
 
     public void close() {
+        verifySnapshots();
         this.open = false;
         entityCache.clear();
+    }
+
+    /**
+      aka dirty checking,
+      TODO complete also Actions engine, like (Update, Create, Delete - Actions) on flush/commit/close
+      snapshot should contains data per one single session and upload data to DB during flush/commit/close
+     */
+    @SneakyThrows
+    private void verifySnapshots() {
+        for (var entityEntry : entityCache.entrySet()) {
+            var entity = entityEntry.getValue();
+            var snapshot = entitySnapshots.get(entityEntry.getKey());
+            var entityFields = EntityUtil.getColumnFields(entity.getClass());
+            for (int i = 0; i < entityFields.length; i++) {
+                var entityField = entityFields[i];
+                entityField.setAccessible(Boolean.TRUE);
+                var entityFieldValue = entityField.get(entity);
+                var snapshotFieldValue = snapshot[i];
+                if (!Objects.equals(entityFieldValue, snapshotFieldValue)) {
+                    System.out.println("Entity field value '" + entityFieldValue + "' has been modified and should be updated on " + snapshotFieldValue);
+                }
+            }
+
+        }
     }
 }
