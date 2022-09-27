@@ -1,6 +1,7 @@
 Custom Hibernate implementation attempt 
 
-Such annotation implementated: 
+Such annotation implementated:
+  @Id
   @Table
   @Column
   @OneToMany
