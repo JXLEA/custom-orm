@@ -14,9 +14,9 @@ Implementated:
   3. LazyLoading  
   
 > Todo:
->  -implement Transaction
->  -implement @Join for OneToOne relation
->  -implement Persist and Update Delete
->  -implement Actions and ActionQueue for all operation types
->  -refactorin
->  -cover all with tests
+>  - implement Transaction
+>  - implement @Join for OneToOne relation
+>  - implement Persist, Update, Delete
+>  - implement Actions and ActionQueue for all operation types
+>  1. refactorin
+>  2. cover all with tests
