@@ -2,11 +2,11 @@
 
 Implementated:
 ```
-  * @Id
-  * @Table
-  * @Column
-  * @OneToMany
-  * @ManyToOne
+  @Id
+  @Table
+  @Column
+  @OneToMany
+  @ManyToOne
 ```  
   1. Session(only with find... operations, also close)
   2. Cache
