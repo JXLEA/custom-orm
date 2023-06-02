@@ -18,5 +18,5 @@ Implementated:
 >  - implement @Join for OneToOne relation
 >  - implement Persist, Update, Delete
 >  - implement Actions and ActionQueue for all operation types
->  1. refactorin
->  2. cover all with tests
+>  1. refactoring
+>  2. tests coverage
