@@ -1,16 +1,17 @@
-###Low level Hibernate implementation 
+### Low level Hibernate implementation 
 
 Implementated:
-  *@Id
-  *@Table
-  *@Column
-  *@OneToMany
-  *@ManyToOne
-  
-  Session(only with find... operations, also close)
-  -Cache
-  -DirtyChecking
-  -LazyLoading  
+```
+  * @Id
+  * @Table
+  * @Column
+  * @OneToMany
+  * @ManyToOne
+```  
+  1. Session(only with find... operations, also close)
+  2. Cache
+  3. DirtyChecking
+  3. LazyLoading  
   
 > Todo:
 >  -implement Transaction
