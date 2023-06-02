@@ -1,23 +1,21 @@
-Custom Hibernate implementation attempt 
+###Low level Hibernate implementation 
 
-Such annotation implementated:
-  @Id
-  @Table
-  @Column
-  @OneToMany
-  @ManyToOne
-
-
-Such mechanisms implemented
-  -Session(only with find... operations, also close)
+Implementated:
+  *@Id
+  *@Table
+  *@Column
+  *@OneToMany
+  *@ManyToOne
+  
+  Session(only with find... operations, also close)
   -Cache
   -DirtyChecking
   -LazyLoading  
   
-Todo:
-  -implement Tranasctions
-  -implement @Join for OneToOne relation
-  -implement Persist and Update Delete
-  -implement Actions and ActionQueue for all operation types
-  -refactorin
-  -cover all with tests
+> Todo:
+>  -implement Transaction
+>  -implement @Join for OneToOne relation
+>  -implement Persist and Update Delete
+>  -implement Actions and ActionQueue for all operation types
+>  -refactorin
+>  -cover all with tests
