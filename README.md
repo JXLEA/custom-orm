@@ -1,6 +1,6 @@
 ### Low-level JPA implementation 
 
-Implementation:
+Annotation processors implemented for:
 ```
   @Id
   @Table
