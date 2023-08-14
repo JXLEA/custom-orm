@@ -1,6 +1,6 @@
-### Low level Hibernate implementation 
+### Low-level JPA implementation 
 
-Implementated:
+Implementation:
 ```
   @Id
   @Table
